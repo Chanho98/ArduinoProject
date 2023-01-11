@@ -81,8 +81,24 @@ https://user-images.githubusercontent.com/78125194/211794336-50ab645e-f1ed-47a2-
 * [LiquidCrystal Library](https://codedragon.tistory.com/7098) 참고
 ****
 
-## 2. Piezo Buzzer Player
+## 2.1 Real Time Clock with LCD
+DS1302 RTC 모듈을 이용하여 LCD 패널에 출력되는 시계 제작
+## 2.2. 실험 회로도
+<p align="center"><img src="https://user-images.githubusercontent.com/78125194/211796065-2dc61d14-0591-4ca7-8c0e-03fd64de5786.png" width="600" height="400"/></p>
+RTC 모듈 VCC, GND, CLK, DAT, RST 핀으로 구성 이를 Uno 보드에 인가
 
+## 2.3. 실험 코드
+```
+```
+## 2.4. 실험 결과
+https://user-images.githubusercontent.com/78125194/211798310-cc4b3e5a-3962-4559-86bc-81dd44485a6b.mp4
+
+![KakaoTalk_20230111_202233662](https://user-images.githubusercontent.com/78125194/211798430-c16eb8dc-3ddf-465c-a5ce-2231bf98b6e2.png)
+
+## ○ 참고 문서
+* [Arduino Water Sensor tool](https://arduinogetstarted.com/tutorials/arduino-water-sensor) 참고
+* [Arduino LCD tool](https://www.thegeekpub.com/236571/arduino-water-level-sensor-tutorial/) 참고
+* [LiquidCrystal Library](https://codedragon.tistory.com/7098) 참고
 ## ○ 참고 문서
 ****
 
