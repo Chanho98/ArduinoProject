@@ -1,5 +1,5 @@
 # ArduinoProject
-Uno 보드를 이용한 프로젝트 [물 수위 센서, 피에조 부저 플레이어, RC카, RealTimeClock &amp; LCD]
+Uno 보드를 이용한 프로젝트 [물 수위 센서, RealTimeClock & LCD, 피에조 부저 플레이어]
 
 ## 1.1. Water Sensor Project
 물 높이 센서를 이용하여 물 높이를 측정하는 실험
@@ -89,6 +89,76 @@ RTC 모듈 VCC, GND, CLK, DAT, RST 핀으로 구성 이를 Uno 보드에 인가
 
 ## 2.3. 실험 코드
 ```
+//---------------------------------
+//           헤더 선언
+//---------------------------------
+#include <virtuabotixRTC.h>       // RTC 모듈 사용을 위한 헤더파일
+#include <Wire.h>                 // I2C 통신을 위한 헤더파일
+#include <LiquidCrystal_I2C.h>    // LCD 사용을 위한 헤더파일
+//---------------------------------
+//           변수 선언
+//---------------------------------
+virtuabotixRTC myRTC(6, 7, 8);    // CLK 6번핀, DAT 7번핀, RST 8번핀 
+LiquidCrystal_I2C lcd(0x27, 16, 2);  // LCD 사용을 위해 주소값 설정
+//---------------------------------
+//           셋업 함수
+//---------------------------------
+void setup()  {
+  Serial.begin(9600);       // 시리얼 통신 시작
+  // LCD 초기화
+  lcd.init();
+  lcd.backlight();          // LCD 초기화
+  myRTC.setDS1302Time(00, 48, 8, 7, 1, 1, 2022);  // (초, 분, 시, 요일, 일, 월, 년)
+}
+//---------------------------------
+//           루프 함수
+//---------------------------------
+// 기본적인 시간 데이터는 모두 DS1302로 부터 받아옴
+void loop()  {
+  myRTC.updateTime();     // 시간 업데이트
+  lcd.setCursor(1,0);     // LCD 커서 위치를 1줄 1칸으로 설정
+  lcd.print(myRTC.year);  // 년도 출력
+  lcd.print("/");
+  lcd.print(myRTC.month); // 월 출력
+  lcd.print("/");
+  lcd.print(myRTC.dayofmonth);  // 일 출력
+  lcd.print("/");
+  // 요일 정보에 따라서 요일 정보를 출력해주는 switch 구문
+  // case 1 ~ case 7까지 각각 월 화 수 목 금 토 일을 출력하도록 함
+  switch (myRTC.dayofweek) {    // 요일 출력
+    case 1: 
+      lcd.print("Sun");
+      break;
+    case 2: 
+      Serial.print("MON");
+      break;
+    case 3: 
+      lcd.print("TUE");
+      break;
+    case 4:   
+      lcd.print("WED");
+      break;
+    case 5:  
+      lcd.print("THU");
+      break;
+    case 6:   
+      lcd.print("FRI");
+      break;
+    case 7:    
+      lcd.print("SAT");
+      break;
+  }     
+  lcd.setCursor(5,1);   // LCD 커서 위치를 2둘 5칸으로 설정
+  lcd.print(myRTC.hours);   // 시간 출력
+  lcd.print(":");
+  lcd.print(myRTC.minutes);   // 분 출력
+  lcd.print(":");
+  lcd.print(myRTC.seconds);   // 초 출력
+
+  delay(1000);      // 1초 딜레이
+  lcd.clear();      // LCD 초기화
+}
+
 ```
 ## 2.4. 실험 결과
 https://user-images.githubusercontent.com/78125194/211798310-cc4b3e5a-3962-4559-86bc-81dd44485a6b.mp4
@@ -99,15 +169,113 @@ https://user-images.githubusercontent.com/78125194/211798310-cc4b3e5a-3962-4559-
 * [Arduino Water Sensor tool](https://arduinogetstarted.com/tutorials/arduino-water-sensor) 참고
 * [Arduino LCD tool](https://www.thegeekpub.com/236571/arduino-water-level-sensor-tutorial/) 참고
 * [LiquidCrystal Library](https://codedragon.tistory.com/7098) 참고
-## ○ 참고 문서
 ****
 
-## 3. RC car Project
+## 3.1. Piezo Buzzer
+ 피에조 효과를 이용한 부저를 이용하여 음악 플레이어를 제작 하였다. 이 때 능동부저는 주파수에 따라 다양한 음을 낼 수 있는데, 아래의 주파수 영역에 따른 음역을 참고하였다.
+## 3.2. 회로도 및 주파수 영역에 따른 음역대
+<p align="center"><img src="https://user-images.githubusercontent.com/78125194/211968523-3a4370ae-bd4b-4e1e-a6e6-4363d15569f7.png" width="700" height="300"/></p>
+
+## 3.3. 실험 코드
+```
+//-------------------------------------
+//               Variables
+//          음 높이 선언(공식 참고)
+//-------------------------------------
+#define NOTE_C4  262
+#define NOTE_CS4 277
+#define NOTE_D4  294
+#define NOTE_DS4 311
+#define NOTE_E4  330
+#define NOTE_F4  349
+#define NOTE_FS4 370
+#define NOTE_G4  392
+#define NOTE_GS4 415
+#define NOTE_A4  440
+#define NOTE_AS4 466
+#define NOTE_B4  494
+#define NOTE_C5  523
+#define NOTE_CS5 554
+#define NOTE_D5  587
+#define NOTE_DS5 622
+#define NOTE_E5  659
+#define NOTE_F5  698
+#define NOTE_FS5 740
+#define NOTE_G5  784
+#define NOTE_GS5 831
+#define NOTE_A5  880
+#define NOTE_AS5 932
+#define NOTE_B5  988
+#define MUSICPIN 8 //입력핀 번호
+
+//-------------------------------------
+//               Variables
+//-------------------------------------
+unsigned long preTime = 0;
+unsigned long Duration = 0;
+int currentnote = 0;
+
+//-------------------------------------
+//                 Music
+//-------------------------------------
+//고향의 봄 계이름 및 음표 정리
+int melodySize = 58; //음 개수
+int melody[] = {
+  NOTE_G4,NOTE_G4,NOTE_E4,NOTE_F4,NOTE_G4,NOTE_A4,NOTE_A4,NOTE_G4,NOTE_G4,NOTE_C5,NOTE_E5,NOTE_D5,NOTE_C5,NOTE_D5,
+  NOTE_E5,NOTE_E5,NOTE_D5,NOTE_D5,NOTE_C5,NOTE_D5,NOTE_C5,NOTE_A4,NOTE_A4,NOTE_G4,NOTE_G4,NOTE_G4,NOTE_E4,NOTE_D4,NOTE_C4,
+  NOTE_D4,NOTE_D4,NOTE_E4,NOTE_C4,NOTE_D4,NOTE_D4,NOTE_E4,NOTE_G4,NOTE_A4,NOTE_C5,NOTE_E5,NOTE_D5,NOTE_C5,NOTE_D5,
+  NOTE_E5,NOTE_E5,NOTE_D5,NOTE_D5,NOTE_C5,NOTE_D5,NOTE_C5,NOTE_A4,NOTE_A4,NOTE_G4,NOTE_G4,NOTE_G4,NOTE_E4,NOTE_D4,NOTE_C4,
+
+  //솔솔미파솔라라솔솔도미레도레
+  //미미레레도레도라라솔솔솔미레도
+  //레레미도레레미솔라도미레도레
+  //미미레레도레도라라솔솔솔미레도
+
+};
+//Mario main them tempo
+int tempo[] = {
+  88,88,176,176,88,88,88,44,88,88,88,176,176,66,
+  88, 88,88,88,88,176,176,88,88,88,88,88,176,176,66,
+  88,88,88,88,88,88,88,88,88,88,88,176,176,66,
+  88,88,88,88,88,176,176,88,88,88,88,88,88,176,176,66,
+
+  //4분음표 : 88 341ms
+  //8분음표 : 176 682ms
+  //2분음표 : 44 1364ms
+  //점 2분음표 : 66 2046ms
+};
+
+//-------------------------------------
+//            setup & loop
+//-------------------------------------
+void setup() {
+  pinMode(MUSICPIN, OUTPUT); //8번핀 출력으로 설정
+}
+
+void loop() {
+    if(millis() < preTime + Duration) { //속도 조절용 함수 너무 빨리 나오면 소리가 망가짐
+        return;
+    }
+    noTone(11); // 다음음 재생까지 잠시 멈춤, https://www.arduino.cc/reference/ko/language/functions/advanced-io/notone/
+    
+    if(currentnote >= melodySize) //음표 조절
+        currentnote = 0;
+    int noteDuration = 60000/tempo[currentnote]; // 정상속도시에 1분에 88개의 4분음표 재생
+                                                   // 60*1000MS/TEMPO
+    
+    tone(MUSICPIN, melody[currentnote], noteDuration); // tone(pin, frequency, duration)
+                                                         // pin : tone을 발생시킬 핀, frequency : tone의 주파수, duration : tone의 지속시간
+    
+    preTime = millis();
+    Duration = noteDuration * 1.3;
+    
+    currentnote++;
+}
+```
+## 3.4. 실험 결과
+<p align="center"><img src="https://user-images.githubusercontent.com/78125194/211969106-52ffdc3a-238e-441e-8632-ebf6848dc408.png" width="700" height="300"/></p>
 
 ## ○ 참고 문서
-****
-
-## 4. RTC LCD Project
-
-## ○ 참고 문서
+* [Piezo Buzzer Tutorial](https://www.instructables.com/How-to-use-a-Buzzer-Arduino-Tutorial/) 참고
+* [Piezo Buzzer Info](https://www.makerguides.com/interface-piezo-buzzer-with-arduino/) 참고
 ****
