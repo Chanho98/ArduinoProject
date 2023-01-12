@@ -256,7 +256,7 @@ void loop() {
     if(millis() < preTime + Duration) { //속도 조절용 함수 너무 빨리 나오면 소리가 망가짐
         return;
     }
-    noTone(11); // 다음음 재생까지 잠시 멈춤, https://www.arduino.cc/reference/ko/language/functions/advanced-io/notone/
+    noTone(11); // 다음음 재생까지 잠시 멈춤
     
     if(currentnote >= melodySize) //음표 조절
         currentnote = 0;
