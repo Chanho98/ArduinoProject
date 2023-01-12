@@ -166,7 +166,6 @@ https://user-images.githubusercontent.com/78125194/211798310-cc4b3e5a-3962-4559-
 ![KakaoTalk_20230111_202233662](https://user-images.githubusercontent.com/78125194/211798430-c16eb8dc-3ddf-465c-a5ce-2231bf98b6e2.png)
 
 ## ○ 참고 문서
-* [Arduino Water Sensor tool](https://arduinogetstarted.com/tutorials/arduino-water-sensor) 참고
 * [Arduino LCD tool](https://www.thegeekpub.com/236571/arduino-water-level-sensor-tutorial/) 참고
 * [LiquidCrystal Library](https://codedragon.tistory.com/7098) 참고
 ****
